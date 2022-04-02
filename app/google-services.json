@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "570854022747",
+    "project_id": "jetreader-54d24",
+    "storage_bucket": "jetreader-54d24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:570854022747:android:f29f2e33905808ab86e97e",
+        "android_client_info": {
+          "package_name": "com.onedudedesign.jetreader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "570854022747-d37rkn1oglqh2gmnkk86pn4im36m1aae.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKsgAvXOKLBFWkGgBfRkootrHamwzb5os"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "570854022747-d37rkn1oglqh2gmnkk86pn4im36m1aae.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
