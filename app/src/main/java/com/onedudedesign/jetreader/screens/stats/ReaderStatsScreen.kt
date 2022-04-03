@@ -1,8 +1,9 @@
 package com.onedudedesign.jetreader.screens.stats
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 
 @Composable
-fun ReaderStatesScreen(){
+fun ReaderStatsScreen(navController: NavHostController) {
 
 }

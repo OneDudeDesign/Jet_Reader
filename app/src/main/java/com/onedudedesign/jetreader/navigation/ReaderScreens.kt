@@ -4,8 +4,9 @@ package com.onedudedesign.jetreader.navigation
 enum class ReaderScreens {
     ReaderSplashScreen,
     ReaderLoginScreen,
-    CreateAccountScreen,
+    ReaderCreateAccountScreen,
     ReaderHomeScreen,
+    ReaderBookSearchScreen,
     ReaderBookDetailScreen,
     ReaderBookUpdateScreen,
     ReaderStatsScreen;
@@ -16,8 +17,9 @@ enum class ReaderScreens {
         = when (route?.substringBefore("/")) {
             ReaderSplashScreen.name -> ReaderSplashScreen
             ReaderLoginScreen.name -> ReaderLoginScreen
-            CreateAccountScreen.name -> CreateAccountScreen
+            ReaderCreateAccountScreen.name -> ReaderCreateAccountScreen
             ReaderHomeScreen.name -> ReaderHomeScreen
+            ReaderBookSearchScreen.name -> ReaderBookSearchScreen
             ReaderBookDetailScreen.name -> ReaderBookDetailScreen
             ReaderBookUpdateScreen.name -> ReaderBookUpdateScreen
             ReaderStatsScreen.name -> ReaderStatsScreen
