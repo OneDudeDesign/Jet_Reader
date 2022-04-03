@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
 import com.onedudedesign.jetreader.R
 import com.onedudedesign.jetreader.components.ReaderLogo
 import com.onedudedesign.jetreader.navigation.ReaderScreens
@@ -35,13 +37,21 @@ fun ReaderSplashScreen(navController: NavHostController) {
     }
     //using launched effect to do the bounce scaling on the splash screen
     LaunchedEffect(key1 = true) {
-        scale.animateTo(1.0f,
-        animationSpec = tween(durationMillis = 2000,
-        easing = { OvershootInterpolator(10f)
-            .getInterpolation(it)}))
+        scale.animateTo(
+            1.0f,
+            animationSpec = tween(durationMillis = 2000,
+                easing = {
+                    OvershootInterpolator(10f)
+                        .getInterpolation(it)
+                })
+        )
         delay(4000L)
-        //later add if to login, for now go home
-        navController.navigate(ReaderScreens.ReaderLoginScreen.name)
+        //check if there is an authenticated user to go home otherwise login
+        if (FirebaseAuth.getInstance().currentUser?.email.isNullOrBlank()) {
+            navController.navigate(ReaderScreens.ReaderLoginScreen.name)
+        } else {
+            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+        }
     }
 
     Surface(
@@ -61,9 +71,11 @@ fun ReaderSplashScreen(navController: NavHostController) {
         ) {
             ReaderLogo()
             Spacer(modifier = Modifier.height(5.dp))
-            Text(text = "\"Read. Change Yourself\"",
-            style = MaterialTheme.typography.h5,
-            color = Color.LightGray)
+            Text(
+                text = "\"Read. Change Yourself\"",
+                style = MaterialTheme.typography.h5,
+                color = Color.LightGray
+            )
         }
 
     }
