@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -42,13 +43,14 @@ import com.onedudedesign.jetreader.model.MBook
 import com.onedudedesign.jetreader.navigation.ReaderScreens
 
 @Composable
-fun ReaderLogo(modifier: Modifier = Modifier){
+fun ReaderLogo(modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(id = R.drawable.books),//drawable needs conversion to painter resource
         contentDescription = "Books in a light bulb",
-        modifier = modifier.size(175.dp,175.dp)//adjust for visual
+        modifier = modifier.size(175.dp, 175.dp)//adjust for visual
     )
 }
+
 @Composable
 fun EmailInput(
     modifier: Modifier = Modifier,
@@ -172,6 +174,7 @@ fun SubmitButton(
     }
 
 }
+
 @Composable
 fun TitleSection(modifier: Modifier = Modifier, label: String) {
 
@@ -189,11 +192,14 @@ fun TitleSection(modifier: Modifier = Modifier, label: String) {
     }
 
 }
+
 @Composable
 fun ReaderAppBar(
     title: String,
+    icon: ImageVector? = null,
     showProfile: Boolean = true,
-    navController: NavController
+    navController: NavController,
+    onBackArrowClicked: () -> Unit = {}
 ) {
     TopAppBar(title = {
 
@@ -201,6 +207,12 @@ fun ReaderAppBar(
             if (showProfile) {
                 ReaderLogo(modifier = Modifier.size(width = 40.dp, height = 40.dp))
             }
+            if (icon != null) {
+                Icon(imageVector = icon, contentDescription = "Arrow Back",
+                    tint = Color.Blue.copy(alpha = 0.7f),
+                    modifier = Modifier.clickable { onBackArrowClicked.invoke() })
+            }
+            Spacer(modifier = Modifier.size(40.dp))
             Text(
                 text = title, color = Color.Blue.copy(alpha = 0.7f),
                 style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp)
@@ -211,16 +223,21 @@ fun ReaderAppBar(
 
 
     }, actions = {
+
         IconButton(onClick = {
             FirebaseAuth.getInstance().signOut().run {
                 navController.navigate(ReaderScreens.ReaderLoginScreen.name)
             }
         }) {
-            Icon(imageVector = Icons.Default.Logout, contentDescription = "Logout")
+            if (showProfile) {
+                Icon(imageVector = Icons.Default.Logout, contentDescription = "Logout")
+            } else Box{}
+
         }
     }, backgroundColor = Color.Transparent, elevation = 5.dp)
 
 }
+
 @Composable
 fun FabContent(onTap: (String) -> Unit) {
     FloatingActionButton(
