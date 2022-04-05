@@ -72,11 +72,18 @@ fun BookList(navController: NavController, viewModel: ReaderBookSearchViewModel 
 
     val listOfBooks = viewModel.list
     if (viewModel.isloading) {
-        LinearProgressIndicator(
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth()
-        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .padding(10.dp)
+
+            )
+            Text(
+                text = "Loading...",
+                modifier = Modifier.padding(top = 5.dp)
+            )
+        }
+
     } else {
 
         LazyColumn(
@@ -94,7 +101,9 @@ fun BookList(navController: NavController, viewModel: ReaderBookSearchViewModel 
 @Composable
 fun BookRow(book: Item, navController: NavController) {
     Card(modifier = Modifier
-        .clickable { }
+        .clickable {
+            navController.navigate(ReaderScreens.ReaderBookDetailScreen.name + "/${book.id}")
+        }
         .fillMaxWidth()
         .height(100.dp)
         .padding(3.dp),
@@ -111,7 +120,8 @@ fun BookRow(book: Item, navController: NavController) {
                 imageUrl = book.volumeInfo.imageLinks.smallThumbnail
             } catch (e: Exception) {
                 Log.d("IMAGEEXC", "BookRow: ${e.message.toString()}")
-                imageUrl = "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80"
+                imageUrl =
+                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80"
             }
 //            val imageURL: String =
 //                if (book.volumeInfo.imageLinks.smallThumbnail.isEmpty())
