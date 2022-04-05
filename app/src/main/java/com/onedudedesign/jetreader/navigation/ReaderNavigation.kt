@@ -1,6 +1,7 @@
 package com.onedudedesign.jetreader.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -10,6 +11,7 @@ import com.onedudedesign.jetreader.screens.details.ReaderBookDetailsScreen
 import com.onedudedesign.jetreader.screens.home.ReaderHomeScreen
 import com.onedudedesign.jetreader.screens.login.ReaderLoginScreen
 import com.onedudedesign.jetreader.screens.search.ReaderBookSearchScreen
+import com.onedudedesign.jetreader.screens.search.ReaderBookSearchViewModel
 import com.onedudedesign.jetreader.screens.stats.ReaderStatsScreen
 import com.onedudedesign.jetreader.screens.update.ReaderBookUpdateScreen
 
@@ -33,7 +35,8 @@ fun ReaderNavigation() {
             ReaderLoginScreen(navController = navController)
         }
         composable(ReaderScreens.ReaderBookSearchScreen.name) {
-            ReaderBookSearchScreen(navController = navController)
+            val searchViewModel = hiltViewModel<ReaderBookSearchViewModel>()
+            ReaderBookSearchScreen(navController = navController, viewModel = searchViewModel)
         }
         composable(ReaderScreens.ReaderStatsScreen.name) {
             ReaderStatsScreen(navController = navController)

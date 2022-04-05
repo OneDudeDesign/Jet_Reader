@@ -20,17 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.onedudedesign.jetreader.components.InputField
 import com.onedudedesign.jetreader.components.ReaderAppBar
-import com.onedudedesign.jetreader.model.MBook
+import com.onedudedesign.jetreader.model.Item
 import com.onedudedesign.jetreader.navigation.ReaderScreens
 
 @Composable
-fun ReaderBookSearchScreen(navController: NavController) {
+fun ReaderBookSearchScreen(
+    navController: NavController,
+    viewModel: ReaderBookSearchViewModel = hiltViewModel()
+) {
     Scaffold(topBar = {
         ReaderAppBar(
             title = "Search Books",
@@ -50,6 +53,7 @@ fun ReaderBookSearchScreen(navController: NavController) {
                         .padding(16.dp)
                 ) {
                     Log.d("SEARCH", "ReaderBookSearchScreen: $it")
+                    viewModel.searchBooks(it)
                 }
 
                 Spacer(modifier = Modifier.height(13.dp))
@@ -62,29 +66,27 @@ fun ReaderBookSearchScreen(navController: NavController) {
 }
 
 @Composable
-fun BookList(navController: NavController) {
+fun BookList(navController: NavController, viewModel: ReaderBookSearchViewModel = hiltViewModel()) {
 
-    val listOfBooks = listOf(
-        MBook("asd,.hklfgasfg", "asdfgasfg", "vcnju", "asfgasfg"),
-        MBook("asdfgasfg", "dfghk", "asfgasfg", "asfgasfg"),
-        MBook("dsfhj", "asdfgasfg", "cvb", "asfgasfg"),
-        MBook("sartasfg", "asdfgasfg", "asfgasfg", "asfgasfg"),
-        MBook("asdfgasfg", "gydghd", "dnsdg", "asfgasfg")
-    )
+    val listOfBooks = viewModel.list
+    if (viewModel.isloading) {
+        LinearProgressIndicator()
+    } else {
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        items(items = listOfBooks) { book ->
-            BookRow(book, navController)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            items(items = listOfBooks) { book ->
+                BookRow(book, navController)
 
+            }
         }
     }
 }
 
 @Composable
-fun BookRow(book: MBook, navController: NavController) {
+fun BookRow(book: Item, navController: NavController) {
     Card(modifier = Modifier
         .clickable { }
         .fillMaxWidth()
@@ -97,8 +99,12 @@ fun BookRow(book: MBook, navController: NavController) {
             modifier = Modifier.padding(5.dp),
             verticalAlignment = Alignment.Top
         ) {
-            val imageURL =
-                "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80"
+            val imageURL: String =
+                if (book.volumeInfo.imageLinks.smallThumbnail.isEmpty())
+                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80"
+                else {
+                    book.volumeInfo.imageLinks.smallThumbnail
+                }
             Image(
                 painter = rememberImagePainter(data = imageURL),
                 contentDescription = "Book Image",
@@ -108,9 +114,9 @@ fun BookRow(book: MBook, navController: NavController) {
                     .padding(end = 4.dp)
             )
             Column {
-                Text(text = book.title.toString(), overflow = TextOverflow.Ellipsis)
+                Text(text = book.volumeInfo.title, overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = "Author: ${book.authors}",
+                    text = "Author: ${book.volumeInfo.authors}",
                     overflow = TextOverflow.Clip,
                     style = MaterialTheme.typography.caption
                 )
