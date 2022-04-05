@@ -29,8 +29,8 @@ class ReaderBookSearchViewModel @Inject constructor(private val repository: Book
     }
 
     fun searchBooks(query: String) {
-        viewModelScope.launch() {
-            isloading = true
+        viewModelScope.launch(Dispatchers.Default) {
+            //  isloading = true removed as it is already true when the viewmodel is created
             if (query.isEmpty()){
                 return@launch
             }

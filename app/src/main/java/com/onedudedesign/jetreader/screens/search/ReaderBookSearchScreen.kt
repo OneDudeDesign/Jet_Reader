@@ -19,6 +19,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,7 +72,11 @@ fun BookList(navController: NavController, viewModel: ReaderBookSearchViewModel 
 
     val listOfBooks = viewModel.list
     if (viewModel.isloading) {
-        LinearProgressIndicator()
+        LinearProgressIndicator(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth()
+        )
     } else {
 
         LazyColumn(
@@ -99,14 +105,22 @@ fun BookRow(book: Item, navController: NavController) {
             modifier = Modifier.padding(5.dp),
             verticalAlignment = Alignment.Top
         ) {
-            val imageURL: String =
-                if (book.volumeInfo.imageLinks.smallThumbnail.isEmpty())
-                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80"
-                else {
-                    book.volumeInfo.imageLinks.smallThumbnail
-                }
+            var imageUrl = ""
+            //placed inside try due to a few records not having the image links at all causing nullpointer reference
+            try {
+                imageUrl = book.volumeInfo.imageLinks.smallThumbnail
+            } catch (e: Exception) {
+                Log.d("IMAGEEXC", "BookRow: ${e.message.toString()}")
+                imageUrl = "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80"
+            }
+//            val imageURL: String =
+//                if (book.volumeInfo.imageLinks.smallThumbnail.isEmpty())
+//                    "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80"
+//                else {
+//                    book.volumeInfo.imageLinks.smallThumbnail
+//                }
             Image(
-                painter = rememberImagePainter(data = imageURL),
+                painter = rememberImagePainter(data = imageUrl),
                 contentDescription = "Book Image",
                 modifier = Modifier
                     .width(80.dp)
@@ -114,13 +128,31 @@ fun BookRow(book: Item, navController: NavController) {
                     .padding(end = 4.dp)
             )
             Column {
-                Text(text = book.volumeInfo.title, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = book.volumeInfo.title,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Bold
+                )
                 Text(
                     text = "Author: ${book.volumeInfo.authors}",
                     overflow = TextOverflow.Clip,
+                    fontStyle = FontStyle.Italic,
                     style = MaterialTheme.typography.caption
                 )
-                //todo add more fields later
+
+                Text(
+                    text = "Date: ${book.volumeInfo.publishedDate}",
+                    overflow = TextOverflow.Clip,
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.caption
+                )
+
+                Text(
+                    text = "Category: ${book.volumeInfo.categories}",
+                    overflow = TextOverflow.Clip,
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.caption
+                )
 
             }
         }
