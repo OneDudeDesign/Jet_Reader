@@ -1,6 +1,8 @@
 package com.onedudedesign.jetreader.di
 
+import com.google.firebase.firestore.FirebaseFirestore
 import com.onedudedesign.jetreader.network.BooksApi
+import com.onedudedesign.jetreader.repository.FireRepository
 import com.onedudedesign.jetreader.utils.Constants
 import dagger.Module
 import dagger.Provides
@@ -14,6 +16,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Singleton
+    @Provides
+    fun provideFireRepository()
+    = FireRepository(queryBook = FirebaseFirestore.getInstance()
+        .collection("books"))
 
     @Singleton
     @Provides

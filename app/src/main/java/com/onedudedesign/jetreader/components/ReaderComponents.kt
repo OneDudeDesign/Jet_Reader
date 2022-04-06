@@ -310,11 +310,9 @@ fun RoundedButton(
     }
 }
 
-@Preview
 @Composable
 fun ListCard(
-    book: MBook = MBook("asdfg", "Running", "The Great", "Is this any good to read"),
-    onPressDetails: (String) -> Unit = {}
+    book: MBook, onPressDetails: (String) -> Unit = {}
 ) {
 
     val context = LocalContext.current
@@ -340,7 +338,7 @@ fun ListCard(
             Row(horizontalArrangement = Arrangement.Center) {
 
                 Image(
-                    painter = rememberImagePainter(data = "http://books.google.com/books/content?id=JGH0DwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"),
+                    painter = rememberImagePainter(data = book.photoUrl.toString()),
                     contentDescription = "Book Image",
                     modifier = Modifier
                         .height(140.dp)

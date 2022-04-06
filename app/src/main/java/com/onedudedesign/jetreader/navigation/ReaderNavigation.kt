@@ -11,6 +11,7 @@ import com.onedudedesign.jetreader.screens.ReaderSplashScreen
 import com.onedudedesign.jetreader.screens.createaccount.ReaderCreateAccountScreen
 import com.onedudedesign.jetreader.screens.details.ReaderBookDetailsScreen
 import com.onedudedesign.jetreader.screens.home.ReaderHomeScreen
+import com.onedudedesign.jetreader.screens.home.ReaderHomeScreenViewModel
 import com.onedudedesign.jetreader.screens.login.ReaderLoginScreen
 import com.onedudedesign.jetreader.screens.search.ReaderBookSearchScreen
 import com.onedudedesign.jetreader.screens.search.ReaderBookSearchViewModel
@@ -43,7 +44,8 @@ fun ReaderNavigation() {
 //            ReaderBookDetailsScreen(navController = navController, bookId = "")
 //        }
         composable(ReaderScreens.ReaderHomeScreen.name) {
-            ReaderHomeScreen(navController = navController)
+            val homeViewModel = hiltViewModel<ReaderHomeScreenViewModel>()
+            ReaderHomeScreen(navController = navController, viewModel = homeViewModel)
         }
         composable(ReaderScreens.ReaderLoginScreen.name) {
             ReaderLoginScreen(navController = navController)
@@ -55,8 +57,20 @@ fun ReaderNavigation() {
         composable(ReaderScreens.ReaderStatsScreen.name) {
             ReaderStatsScreen(navController = navController)
         }
-        composable(ReaderScreens.ReaderBookUpdateScreen.name) {
-            ReaderBookUpdateScreen(navController = navController)
+        val updateName = ReaderScreens.ReaderBookUpdateScreen.name
+        composable("$updateName/{bookItemId}",
+            arguments = listOf(
+                navArgument(name = "bookItemId") {
+                    type = NavType.StringType
+                }
+            )) {navBack ->
+            navBack.arguments?.getString("bookItemId").let { bookItemId ->
+                ReaderBookUpdateScreen(navController = navController, bookItemId = bookItemId.toString())
+            }
+
         }
+//        composable(ReaderScreens.ReaderBookUpdateScreen.name) {
+//            ReaderBookUpdateScreen(navController = navController)
+//        }
     }
 }

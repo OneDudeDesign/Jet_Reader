@@ -9,6 +9,7 @@ data class MBook(
     var title: String? = null,
     var authors: String? = null,
     var notes: String? = null,
+    //use setters and getters to insert underscored names into firestore (required over camel case!!)
     @get:PropertyName("book_photo_url")
     @set:PropertyName("book_photo_url")
     var photoUrl: String? = null,
