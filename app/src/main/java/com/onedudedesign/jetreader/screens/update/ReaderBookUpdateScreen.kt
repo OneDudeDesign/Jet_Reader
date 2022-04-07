@@ -1,6 +1,7 @@
 package com.onedudedesign.jetreader.screens.update
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -28,11 +30,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.onedudedesign.jetreader.components.InputField
+import com.onedudedesign.jetreader.components.RatingBar
 import com.onedudedesign.jetreader.components.ReaderAppBar
+import com.onedudedesign.jetreader.components.RoundedButton
 import com.onedudedesign.jetreader.data.DataOrException
 import com.onedudedesign.jetreader.model.MBook
+import com.onedudedesign.jetreader.screens.details.saveToFirebase
 import com.onedudedesign.jetreader.screens.home.ReaderHomeScreenViewModel
+import com.onedudedesign.jetreader.utils.Utils
 
 @Composable
 fun ReaderBookUpdateScreen(
@@ -99,16 +108,118 @@ fun ReaderBookUpdateScreen(
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ShowSimpleForm(book: MBook, navController: NavHostController) {
     val notesText = remember {
         mutableStateOf("")
+    }
+    val isStartedReading = remember {
+        mutableStateOf(false)
+    }
+    val isFinishedReading = remember {
+        mutableStateOf(false)
+    }
+    val ratingVal = remember {
+        mutableStateOf(0)
     }
     SimpleForm(
         defaultValue = if (book.notes.toString().isNotEmpty()) book.notes.toString()
         else "No thoughts available."
     ) {
         notesText.value = it
+    }
+
+    Row(
+        Modifier.padding(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+
+    ) {
+        TextButton(
+            onClick = { isStartedReading.value = true },
+            enabled = book.startedReading == null
+        ) {
+            if (book.startedReading == null) {
+                if (!isStartedReading.value) {
+                    Text(text = "Start Reading")
+                } else {
+                    Text(
+                        text = "Started Reading!",
+                        modifier = Modifier.alpha(0.6f),
+                        color = Color.Red.copy(alpha = 0.5f)
+                    )
+                }
+
+            } else {
+                Text(text = "Started on: ${book.startedReading}") //todo format
+            }
+
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        TextButton(
+            onClick = { isFinishedReading.value = true },
+            enabled = book.finishedReading == null
+
+        ) {
+            if (book.finishedReading == null) {
+                if (!isFinishedReading.value) {
+                    Text(text = "Mark as Read")
+                } else {
+                    Text(text = "Finished Reading")
+                }
+            } else {
+                Text(text = "Finished on: ${book.finishedReading}") //todo format date
+            }
+
+        }
+
+    }
+    Text(text = "Rating", modifier = Modifier.padding(bottom = 3.dp))
+    book.rating?.toInt().let { rating ->
+        RatingBar(rating = rating!!) { rating ->
+            ratingVal.value = rating
+
+        }
+    }
+
+    Row(Modifier.padding(top = 20.dp)) {
+        val changedNotes = book.notes != notesText.value
+        val changeRating = book.rating?.toInt() != ratingVal.value
+        val isFinishedTimeStamp =
+            if (isFinishedReading.value) Timestamp.now() else book.finishedReading
+        val isStartedTimeStamp =
+            if (isStartedReading.value) Timestamp.now() else book.startedReading
+
+        val bookUpdate =
+            changedNotes || changeRating || isStartedReading.value || isFinishedReading.value
+
+        val bookToUpdate = hashMapOf(
+            "finished_reading_at" to isFinishedTimeStamp,
+            "started_reading_at" to isStartedTimeStamp,
+            "rating" to ratingVal.value,
+            "notes" to notesText.value
+        ).toMap()
+
+        RoundedButton(label = "Update") {
+            if (bookUpdate){
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id!!)
+                    .update(bookToUpdate)
+                    .addOnCompleteListener {
+                        Log.d("Result", "ShowSimpleForm: ${it.result}")
+                    }
+                    .addOnFailureListener {
+                        Log.w("Error", "Error Updating Document", it, )
+                    }
+            }
+
+        }
+        Spacer(modifier = Modifier.width(50.dp))
+        RoundedButton(label = "Delete") {
+        }
+
     }
 }
 
@@ -146,7 +257,10 @@ fun SimpleForm(
 }
 
 @Composable
-fun ShowBookUpdate(bookInfo: DataOrException<List<MBook>, Boolean, Exception>, bookItemId: String) {
+fun ShowBookUpdate(
+    bookInfo: DataOrException<List<MBook>, Boolean, Exception>,
+    bookItemId: String
+) {
     Row {
         Spacer(modifier = Modifier.width(43.dp))
         if (bookInfo.data != null) {
@@ -202,12 +316,22 @@ fun CardListItem(book: MBook, onPressDetails: () -> Unit) {
                 Text(
                     text = book.authors.toString(),
                     style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 0.dp)
+                    modifier = Modifier.padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 2.dp,
+                        bottom = 0.dp
+                    )
                 )
                 Text(
                     text = book.publishedDate.toString(),
                     style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 0.dp, bottom = 8.dp)
+                    modifier = Modifier.padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 0.dp,
+                        bottom = 8.dp
+                    )
                 )
 
             }
