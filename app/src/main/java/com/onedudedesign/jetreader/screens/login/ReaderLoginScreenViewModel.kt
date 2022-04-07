@@ -33,6 +33,9 @@ class ReaderLoginScreenViewModel : ViewModel() {
                             Log.d("FB", "signInWithEmailAndPassword: ${it.result.toString()} ")
                         }
                     }
+                    .addOnFailureListener {
+                        Log.d("LOGIN", "signInWithEmailAndPassword: FAILED ${it.message}")
+                    }
 
             } catch (ex: Exception) {
                 Log.d("FB", "signInWithEmailAndPassword: ${ex.message}")

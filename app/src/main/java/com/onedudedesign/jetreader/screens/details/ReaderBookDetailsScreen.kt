@@ -28,7 +28,7 @@ import com.onedudedesign.jetreader.data.Resource
 import com.onedudedesign.jetreader.model.Item
 import com.onedudedesign.jetreader.model.MBook
 import com.onedudedesign.jetreader.navigation.ReaderScreens
-import com.onedudedesign.jetreader.utils.Utils
+import com.onedudedesign.jetreader.utils.getImageDetailContent
 
 @Composable
 fun ReaderBookDetailsScreen(
@@ -117,7 +117,7 @@ fun DetailContent(book: Resource<Item>, navController: NavController) {
         ) {
             //Book image at top from util function
             Image(
-                painter = rememberImagePainter(data = Utils().getImageDetailContent(book)),
+                painter = rememberImagePainter(data = getImageDetailContent(book)),
                 contentDescription = "Book Image",
                 modifier = Modifier
                     .width(125.dp)
@@ -173,7 +173,7 @@ fun DetailContent(book: Resource<Item>, navController: NavController) {
                         title = title,
                         authors = authors.toString(),
                         notes = "",
-                        photoUrl = Utils().getImageDetailContent(book),
+                        photoUrl = getImageDetailContent(book),
                         categories = categories,
                         publishedDate = publishedDate,
                         rating = rating,

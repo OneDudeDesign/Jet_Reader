@@ -1,5 +1,6 @@
 package com.onedudedesign.jetreader.screens.update
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -12,10 +13,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -23,7 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,15 +33,18 @@ import coil.compose.rememberImagePainter
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.onedudedesign.jetreader.R
 import com.onedudedesign.jetreader.components.InputField
 import com.onedudedesign.jetreader.components.RatingBar
 import com.onedudedesign.jetreader.components.ReaderAppBar
 import com.onedudedesign.jetreader.components.RoundedButton
 import com.onedudedesign.jetreader.data.DataOrException
 import com.onedudedesign.jetreader.model.MBook
-import com.onedudedesign.jetreader.screens.details.saveToFirebase
+import com.onedudedesign.jetreader.navigation.ReaderScreens
+import com.onedudedesign.jetreader.screens.ReaderSplashScreen
 import com.onedudedesign.jetreader.screens.home.ReaderHomeScreenViewModel
-import com.onedudedesign.jetreader.utils.Utils
+import com.onedudedesign.jetreader.utils.formatDate
+import com.onedudedesign.jetreader.utils.showToast
 
 @Composable
 fun ReaderBookUpdateScreen(
@@ -123,6 +126,7 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
     val ratingVal = remember {
         mutableStateOf(0)
     }
+    val context = LocalContext.current
     SimpleForm(
         defaultValue = if (book.notes.toString().isNotEmpty()) book.notes.toString()
         else "No thoughts available."
@@ -152,7 +156,7 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
                 }
 
             } else {
-                Text(text = "Started on: ${book.startedReading}") //todo format
+                Text(text = "Started on: ${formatDate(book.startedReading!!)}")
             }
 
         }
@@ -169,7 +173,7 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
                     Text(text = "Finished Reading")
                 }
             } else {
-                Text(text = "Finished on: ${book.finishedReading}") //todo format date
+                Text(text = "Finished on: ${formatDate(book.finishedReading!!)}") //todo format date
             }
 
         }
@@ -202,26 +206,78 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
         ).toMap()
 
         RoundedButton(label = "Update") {
-            if (bookUpdate){
+            if (bookUpdate) {
                 FirebaseFirestore.getInstance()
                     .collection("books")
                     .document(book.id!!)
                     .update(bookToUpdate)
                     .addOnCompleteListener {
-                        Log.d("Result", "ShowSimpleForm: ${it.result}")
+                        showToast(context, "Book Updated Successfully")
+                        navController.navigate(ReaderScreens.ReaderHomeScreen.name)
                     }
                     .addOnFailureListener {
-                        Log.w("Error", "Error Updating Document", it, )
+                        Log.w("Error", "Error Updating Document", it)
                     }
             }
 
         }
         Spacer(modifier = Modifier.width(50.dp))
+
+        val openDialog = remember {
+            mutableStateOf(false)
+        }
+        if (openDialog.value) {
+            ShowAlertDialog(message = stringResource(id = R.string.sure) + "\n" + stringResource(id = R.string.action), openDialog){
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id!!)
+                    .delete()
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            openDialog.value = false
+                            //if you use popbackstack it won't recompose the Home screen and show the change must navigate to recompose
+                            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                        }
+                    }
+                    .addOnFailureListener {  }
+            }
+        }
         RoundedButton(label = "Delete") {
+            openDialog.value=true
         }
 
     }
 }
+
+@Composable
+fun ShowAlertDialog(
+    message: String,
+    openDialog: MutableState<Boolean>,
+    onYesPressed: () -> Unit
+) {
+    if (openDialog.value) {
+        AlertDialog(onDismissRequest = { openDialog.value=false },
+            title = { Text(text = "Delete Book")},
+            text = { Text(text = message)},
+            buttons = {
+                Row(modifier = Modifier.padding(8.dp),
+                    horizontalArrangement = Arrangement.Center
+
+                ) {
+                    TextButton(onClick = { onYesPressed.invoke() }) {
+                        Text(text = "Yes")
+                    }
+                    TextButton(onClick = { openDialog.value = false}) {
+                        Text(text = "No")
+                    }
+
+                }
+            }
+
+        )
+    }
+}
+
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
