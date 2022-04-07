@@ -128,8 +128,11 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
     }
     val context = LocalContext.current
     SimpleForm(
-        defaultValue = if (book.notes.toString().isNotEmpty()) book.notes.toString()
-        else "No thoughts available."
+        defaultValue = if (book.notes.toString().isNotEmpty()) {
+            book.notes.toString()
+        } else {
+            "No thoughts available."
+        }
     ) {
         notesText.value = it
     }
@@ -227,7 +230,10 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
             mutableStateOf(false)
         }
         if (openDialog.value) {
-            ShowAlertDialog(message = stringResource(id = R.string.sure) + "\n" + stringResource(id = R.string.action), openDialog){
+            ShowAlertDialog(
+                message = stringResource(id = R.string.sure) + "\n" + stringResource(id = R.string.action),
+                openDialog
+            ) {
                 FirebaseFirestore.getInstance()
                     .collection("books")
                     .document(book.id!!)
@@ -239,11 +245,11 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
                             navController.navigate(ReaderScreens.ReaderHomeScreen.name)
                         }
                     }
-                    .addOnFailureListener {  }
+                    .addOnFailureListener { }
             }
         }
         RoundedButton(label = "Delete") {
-            openDialog.value=true
+            openDialog.value = true
         }
 
     }
@@ -256,18 +262,19 @@ fun ShowAlertDialog(
     onYesPressed: () -> Unit
 ) {
     if (openDialog.value) {
-        AlertDialog(onDismissRequest = { openDialog.value=false },
-            title = { Text(text = "Delete Book")},
-            text = { Text(text = message)},
+        AlertDialog(onDismissRequest = { openDialog.value = false },
+            title = { Text(text = "Delete Book") },
+            text = { Text(text = message) },
             buttons = {
-                Row(modifier = Modifier.padding(8.dp),
+                Row(
+                    modifier = Modifier.padding(8.dp),
                     horizontalArrangement = Arrangement.Center
 
                 ) {
                     TextButton(onClick = { onYesPressed.invoke() }) {
                         Text(text = "Yes")
                     }
-                    TextButton(onClick = { openDialog.value = false}) {
+                    TextButton(onClick = { openDialog.value = false }) {
                         Text(text = "No")
                     }
 

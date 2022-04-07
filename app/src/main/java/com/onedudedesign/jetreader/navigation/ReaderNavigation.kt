@@ -55,7 +55,8 @@ fun ReaderNavigation() {
             ReaderBookSearchScreen(navController = navController, viewModel = searchViewModel)
         }
         composable(ReaderScreens.ReaderStatsScreen.name) {
-            ReaderStatsScreen(navController = navController)
+            val homeScreenViewModel = hiltViewModel<ReaderHomeScreenViewModel>()
+            ReaderStatsScreen(navController = navController, viewModel = homeScreenViewModel)
         }
         val updateName = ReaderScreens.ReaderBookUpdateScreen.name
         composable("$updateName/{bookItemId}",
